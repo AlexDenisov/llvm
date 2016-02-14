@@ -44,7 +44,8 @@ class TestingProgressDisplay(object):
 
         shouldShow = test.result.code.isFailure or \
             self.opts.showAllOutput or \
-            (not self.opts.quiet and not self.opts.succinct)
+            (not self.opts.quiet and not self.opts.succinct) or \
+            self.opts.xcodeCompatibleOutput
         if not shouldShow:
             return
 
@@ -53,17 +54,20 @@ class TestingProgressDisplay(object):
 
         # Show the test result line.
         test_name = test.getFullName()
-        print('%s: %s (%d of %d)' % (test.result.code.name, test_name,
-                                     self.completed, self.numTests))
+        if not self.opts.xcodeCompatibleOutput:
+            print('%s: %s (%d of %d)' % (test.result.code.name, test_name,
+                                         self.completed, self.numTests))
 
         # Show the test failure output, if requested.
         if (test.result.code.isFailure and self.opts.showOutput) or \
-           self.opts.showAllOutput:
-            if test.result.code.isFailure:
+           self.opts.showAllOutput or \
+           self.opts.xcodeCompatibleOutput:
+            if test.result.code.isFailure and not self.opts.xcodeCompatibleOutput:
                 print("%s TEST '%s' FAILED %s" % ('*'*20, test.getFullName(),
                                                   '*'*20))
-            print(test.result.output)
-            print("*" * 20)
+            if self.opts.xcodeCompatibleOutput:
+                print(test.result.output)
+                print("*" * 20)
 
         # Report test metrics, if present.
         if test.result.metrics:
@@ -168,6 +172,9 @@ def main(builtinParameters = {}):
                      action="store_true", default=False)
     group.add_option("-a", "--show-all", dest="showAllOutput",
                      help="Display all commandlines and output",
+                     action="store_true", default=False)
+    group.add_option("-x", "--xcode-compatible", dest="xcodeCompatibleOutput",
+                     help="Display Xcode compatible output",
                      action="store_true", default=False)
     group.add_option("-o", "--output", dest="output_path",
                      help="Write test results to the provided path",
@@ -441,6 +448,12 @@ def main(builtinParameters = {}):
         byCode[test.result.code].append(test)
         if test.result.code.isFailure:
             hasFailures = True
+
+    if opts.xcodeCompatibleOutput:
+        if hasFailures:
+            exit(1)
+        else:
+            exit(0)
 
     # Print each test in any of the failing groups.
     for title,code in (('Unexpected Passing Tests', lit.Test.XPASS),
