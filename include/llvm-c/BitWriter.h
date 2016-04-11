@@ -41,9 +41,11 @@ int LLVMWriteBitcodeToFile(LLVMModuleRef M, const char *Path);
 int LLVMWriteBitcodeToFD(LLVMModuleRef M, int FD, int ShouldClose,
                          int Unbuffered);
 
-/** Deprecated for LLVMWriteBitcodeToFD. Writes a module to an open file
-    descriptor. Returns 0 on success. Closes the Handle. */
-int LLVMWriteBitcodeToFileHandle(LLVMModuleRef M, int Handle);
+/** Writes a module to an open file descriptor. Returns 0 on success. 
+    Closes the Handle. */
+LLVM_ATTRIBUTE_DEPRECATED(
+  int LLVMWriteBitcodeToFileHandle(LLVMModuleRef M, int Handle), 
+  "Use LLVMWriteBitcodeToFD");
 
 /** Writes a module to a new memory buffer and returns it. */
 LLVMMemoryBufferRef LLVMWriteBitcodeToMemoryBuffer(LLVMModuleRef M);

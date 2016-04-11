@@ -15,6 +15,7 @@
 #ifndef LLVM_C_CORE_H
 #define LLVM_C_CORE_H
 
+#include "llvm-c/Definitions.h"
 #include "llvm-c/ErrorHandling.h"
 #include "llvm-c/Types.h"
 
@@ -546,13 +547,21 @@ void LLVMSetModuleIdentifier(LLVMModuleRef M, const char *Ident, size_t Len);
  * Obtain the data layout for a module.
  *
  * @see Module::getDataLayoutStr()
+ */
+const char *LLVMGetDataLayoutStr(LLVMModuleRef M);
+
+/**
+ * Obtain the data layout for a module.
+ *
+ * @see Module::getDataLayoutStr()
  *
  * LLVMGetDataLayout is DEPRECATED, as the name is not only incorrect,
  * but match the name of another method on the module. Prefer the use
  * of LLVMGetDataLayoutStr, which is not ambiguous.
  */
-const char *LLVMGetDataLayoutStr(LLVMModuleRef M);
-const char *LLVMGetDataLayout(LLVMModuleRef M);
+LLVM_ATTRIBUTE_DEPRECATED(
+  const char *LLVMGetDataLayout(LLVMModuleRef M), 
+  "Use LLVMGetDataLayoutStr");
 
 /**
  * Set the data layout for a module.
@@ -3110,8 +3119,9 @@ LLVMPassManagerRef LLVMCreatePassManager(void);
     @see llvm::FunctionPassManager::FunctionPassManager */
 LLVMPassManagerRef LLVMCreateFunctionPassManagerForModule(LLVMModuleRef M);
 
-/** Deprecated: Use LLVMCreateFunctionPassManagerForModule instead. */
-LLVMPassManagerRef LLVMCreateFunctionPassManager(LLVMModuleProviderRef MP);
+LLVM_ATTRIBUTE_DEPRECATED(
+  LLVMPassManagerRef LLVMCreateFunctionPassManager(LLVMModuleProviderRef MP), 
+  "Use LLVMCreateFunctionPassManagerForModule");
 
 /** Initializes, executes on the provided module, and finalizes all of the
     passes scheduled in the pass manager. Returns 1 if any of the passes
@@ -3152,14 +3162,16 @@ void LLVMDisposePassManager(LLVMPassManagerRef PM);
  * @{
  */
 
-/** Deprecated: Multi-threading can only be enabled/disabled with the compile
-    time define LLVM_ENABLE_THREADS.  This function always returns
-    LLVMIsMultithreaded(). */
-LLVMBool LLVMStartMultithreaded(void);
+LLVM_ATTRIBUTE_DEPRECATED(
+  LLVMBool LLVMStartMultithreaded(void), 
+  "Multi-threading can only be enabled/disabled with the compile "
+  "time define LLVM_ENABLE_THREADS. This function always returns "
+  "LLVMIsMultithreaded()");
 
-/** Deprecated: Multi-threading can only be enabled/disabled with the compile
-    time define LLVM_ENABLE_THREADS. */
-void LLVMStopMultithreaded(void);
+LLVM_ATTRIBUTE_DEPRECATED(
+  void LLVMStopMultithreaded(void), 
+  "Multi-threading can only be enabled/disabled with the compile "
+  "time define LLVM_ENABLE_THREADS");
 
 /** Check whether LLVM is executing in thread-safe mode or not.
     @see llvm::llvm_is_multithreaded */
