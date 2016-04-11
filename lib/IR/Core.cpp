@@ -17,6 +17,7 @@
 #include "llvm/IR/Attributes.h"
 #include "llvm/IR/CallSite.h"
 #include "llvm/IR/Constants.h"
+#include "llvm/IR/DebugInfoMetadata.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/DiagnosticInfo.h"
 #include "llvm/IR/DiagnosticPrinter.h"
@@ -107,6 +108,78 @@ unsigned LLVMGetMDKindIDInContext(LLVMContextRef C, const char* Name,
 
 unsigned LLVMGetMDKindID(const char* Name, unsigned SLen) {
   return LLVMGetMDKindIDInContext(LLVMGetGlobalContext(), Name, SLen);
+}
+
+unsigned int LLVMGetMetadataKind(LLVMValueRef Val) {
+  if (auto *MD = dyn_cast<MetadataAsValue>(unwrap(Val))) {
+    return MD->getMetadata()->getMetadataID();
+  }
+
+  return 0;
+}
+
+const char *LLVMGetModuleFilename(LLVMModuleRef ModuleRef) {
+  NamedMDNode *N = unwrap(ModuleRef)->getNamedMetadata("llvm.dbg.cu");
+  if (N && N->getNumOperands() != 0) {
+    if (auto *Scope = dyn_cast<DIScope>(N->getOperand(0))) {
+      return Scope->getFilename().data();
+    }
+
+  }
+
+  return nullptr;
+}
+
+const char *LLVMGetModuleDirectory(LLVMModuleRef ModuleRef) {
+  NamedMDNode *N = unwrap(ModuleRef)->getNamedMetadata("llvm.dbg.cu");
+  if (N && N->getNumOperands() != 0) {
+    if (auto *Scope = dyn_cast<DIScope>(N->getOperand(0))) {
+      return Scope->getDirectory().data();
+    }
+
+  }
+
+  return nullptr;
+}
+
+const char *LLVMGetDILocationFilename(LLVMValueRef Val) {
+  if (auto *MD = dyn_cast<MetadataAsValue>(unwrap(Val))) {
+    if (auto *DI = dyn_cast<DILocation>(MD->getMetadata())) {
+      return DI->getFilename().data();
+    }
+  }
+
+  return nullptr;
+}
+
+const char *LLVMGetDILocationDirectory(LLVMValueRef Val) {
+  if (auto *MD = dyn_cast<MetadataAsValue>(unwrap(Val))) {
+    if (DILocation *DI = dyn_cast<DILocation>(MD->getMetadata())) {
+      return DI->getDirectory().data();
+    }
+  }
+
+  return nullptr;
+}
+
+unsigned int LLVMGetDILocationColumn(LLVMValueRef Val) {
+  if (auto *MD = dyn_cast<MetadataAsValue>(unwrap(Val))) {
+    if (DILocation *DI = dyn_cast<DILocation>(MD->getMetadata())) {
+      return DI->getColumn();
+    }
+  }
+
+  return 0;
+}
+
+unsigned int LLVMGetDILocationLineNumber(LLVMValueRef Val) {
+  if (auto *MD = dyn_cast<MetadataAsValue>(unwrap(Val))) {
+    if (DILocation *DI = dyn_cast<DILocation>(MD->getMetadata())) {
+      return DI->getLine();
+    }
+  }
+
+  return 0;
 }
 
 char *LLVMGetDiagInfoDescription(LLVMDiagnosticInfoRef DI) {
@@ -1658,6 +1731,10 @@ LLVMValueRef LLVMAddFunction(LLVMModuleRef M, const char *Name,
                              LLVMTypeRef FunctionTy) {
   return wrap(Function::Create(unwrap<FunctionType>(FunctionTy),
                                GlobalValue::ExternalLinkage, Name, unwrap(M)));
+}
+
+LLVMTypeRef LLVMGetFunctionType(LLVMValueRef F) {
+    return wrap(unwrap<Function>(F)->getFunctionType());
 }
 
 LLVMValueRef LLVMGetNamedFunction(LLVMModuleRef M, const char *Name) {

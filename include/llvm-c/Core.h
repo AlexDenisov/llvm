@@ -3091,6 +3091,51 @@ LLVMBool LLVMIsMultithreaded(void);
  * @}
  */
 
+#pragma mark - Mutang Extentsions
+
+LLVMTypeRef LLVMGetFunctionType(LLVMValueRef F);
+
+enum MetadataKind {
+  MDTupleKind,
+  DILocationKind,
+  GenericDINodeKind,
+  DISubrangeKind,
+  DIEnumeratorKind,
+  DIBasicTypeKind,
+  DIDerivedTypeKind,
+  DICompositeTypeKind,
+  DISubroutineTypeKind,
+  DIFileKind,
+  DICompileUnitKind,
+  DISubprogramKind,
+  DILexicalBlockKind,
+  DILexicalBlockFileKind,
+  DINamespaceKind,
+  DIModuleKind,
+  DITemplateTypeParameterKind,
+  DITemplateValueParameterKind,
+  DIGlobalVariableKind,
+  DILocalVariableKind,
+  DIExpressionKind,
+  DIObjCPropertyKind,
+  DIImportedEntityKind,
+  ConstantAsMetadataKind,
+  LocalAsMetadataKind,
+  MDStringKind,
+  DIMacroKind,
+  DIMacroFileKind
+};
+
+unsigned int LLVMGetMetadataKind(LLVMValueRef Val);
+
+const char *LLVMGetDILocationFilename(LLVMValueRef Val);
+const char *LLVMGetDILocationDirectory(LLVMValueRef Val);
+unsigned int LLVMGetDILocationColumn(LLVMValueRef Val);
+unsigned int LLVMGetDILocationLineNumber(LLVMValueRef Val);
+
+const char *LLVMGetModuleFilename(LLVMModuleRef ModuleRef);
+const char *LLVMGetModuleDirectory(LLVMModuleRef ModuleRef);
+
 #ifdef __cplusplus
 }
 #endif
