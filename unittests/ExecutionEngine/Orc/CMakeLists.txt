@@ -6,6 +6,7 @@ set(LLVM_LINK_COMPONENTS
   OrcJIT
   RuntimeDyld
   Support
+  Target
   native
   )
 

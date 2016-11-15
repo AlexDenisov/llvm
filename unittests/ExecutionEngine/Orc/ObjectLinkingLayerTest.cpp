@@ -183,6 +183,30 @@ TEST_F(ObjectLinkingLayerExecutionTest, NoDuplicateFinalization) {
       << "Extra call to finalize";
 }
 
+TEST_F(ObjectLinkingLayerExecutionTest, DoubleModuleCompilation) {
+  if (!TM)
+    return;
+
+  TM->setOptLevel(CodeGenOpt::None);
+
+  SimpleCompiler Compile(*TM);
+
+  ModuleBuilder MB(Context, "", "dummy");
+  {
+    MB.getModule()->setDataLayout(TM->createDataLayout());
+    Function *FooImpl = MB.createFunctionDecl<int32_t(void)>("foo");
+    FooImpl->addFnAttr(Attribute::StackProtectReq);
+    BasicBlock *FooEntry = BasicBlock::Create(Context, "entry", FooImpl);
+    IRBuilder<> FooBuilder(FooEntry);
+    IntegerType *Int32Ty = IntegerType::get(Context, 32);
+    Value *FourtyTwo = ConstantInt::getSigned(Int32Ty, 42);
+    FooBuilder.CreateRet(FourtyTwo);
+  }
+  Module *module = MB.getModule();
+  auto Obj1 = Compile(*module);
+  auto Obj2 = Compile(*module);
+};
+
 TEST_F(ObjectLinkingLayerExecutionTest, NoPrematureAllocation) {
   if (!TM)
     return;
